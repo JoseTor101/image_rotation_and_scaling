@@ -1,0 +1,34 @@
+name: C++ Code Formatter & Linter
+
+on: 
+  push:
+    branches:
+      - master
+      - develop
+  pull_request:
+    branches:
+      - master
+      - develop
+
+jobs:
+  format-lint:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Install ClangFormat & ClangTidy
+        run: sudo apt-get install -y clang-format clang-tidy
+
+      - name: Run ClangFormat
+        run: |
+          find . -name "*.cpp" -o -name "*.h" | xargs clang-format -i
+
+      - name: Run ClangTidy
+        run: |
+          find . -name "*.cpp" -o -name "*.h" | xargs clang-tidy --warnings-as-errors=*
+
+      - name: Check for Formatting Changes
+        run: |
+          git diff --exit-code || (echo "Code is not formatted. Run clang-format locally." && exit 1)
