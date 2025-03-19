@@ -3,23 +3,29 @@ name: C++ Code Formatter & Linter
 on: 
   push:
     branches:
-      - master
       - develop
   pull_request:
     branches:
-      - master
       - develop
 
 jobs:
   format-lint:
     runs-on: ubuntu-latest
-    
+
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
-      - name: Install ClangFormat & ClangTidy
-        run: sudo apt-get install -y clang-format clang-tidy
+      - name: Install Dependencies
+        run: sudo apt-get install -y clang-format clang-tidy bear
+
+      - name: Generate Compilation Database
+        run: |
+          mkdir build
+          cd build
+          cmake .. -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
+          cd ..
+          cp build/compile_commands.json .
 
       - name: Run ClangFormat
         run: |
@@ -27,7 +33,14 @@ jobs:
 
       - name: Run ClangTidy
         run: |
-          find . -name "*.cpp" -o -name "*.h" | xargs clang-tidy --warnings-as-errors=*
+          FILES=$(find . -name "*.cpp" -o -name "*.h")
+          if [ -z "$FILES" ]; then
+            echo "No C++ source files found. Skipping clang-tidy."
+          else
+            echo "Running clang-tidy on the following files:"
+            echo "$FILES"
+            echo "$FILES" | xargs clang-tidy --warnings-as-errors=* --p=.
+          fi
 
       - name: Check for Formatting Changes
         run: |
