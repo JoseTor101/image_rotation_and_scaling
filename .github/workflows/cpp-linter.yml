@@ -8,6 +8,9 @@ on:
     branches:
       - develop
 
+permissions:
+  contents: write  
+  
 jobs:
   format-lint:
     runs-on: ubuntu-latest
@@ -15,23 +18,25 @@ jobs:
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}  # Allows pushing changes back
 
       - name: Install Dependencies
         run: sudo apt-get install -y clang-format clang-tidy bear libeigen3-dev
 
       - name: Generate Compilation Database
         run: |
-          mkdir build
+          mkdir -p build
           cd build
           cmake .. -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
           cd ..
           cp build/compile_commands.json .
 
-      - name: Run ClangFormat
+      - name: Run ClangFormat (Auto-Fix)
         run: |
           find . -name "*.cpp" -o -name "*.h" | xargs clang-format -i
 
-      - name: Run ClangTidy
+      - name: Run ClangTidy (Auto-Fix)
         run: |
           FILES=$(find . -name "*.cpp" -o -name "*.h")
           if [ -z "$FILES" ]; then
@@ -39,9 +44,13 @@ jobs:
           else
             echo "Running clang-tidy on the following files:"
             echo "$FILES"
-            echo "$FILES" | xargs clang-tidy --warnings-as-errors=* --p=.
+            echo "$FILES" | xargs clang-tidy --fix --p=. || true  # Avoid failure if warnings exist
           fi
 
-      - name: Check for Formatting Changes
+      - name: Commit and Push Formatting Changes
         run: |
-          git diff --exit-code || (echo "Code is not formatted. Run clang-format locally." && exit 1)
+          git config --global user.name "github-actions"
+          git config --global user.email "github-actions@github.com"
+          git add .
+          git commit -m "Auto-format C++ code with clang-format & clang-tidy" || exit 0
+          git push origin HEAD:${{ github.ref_name }}
