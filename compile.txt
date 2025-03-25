@@ -1,2 +1,2 @@
- g++ -o main main.cpp image.cpp stb_wrapper.cpp -I.
+
  g++ -o main main.cpp image.cpp stb_wrapper.cpp -I. -I/usr/include/eigen3

@@ -7,8 +7,8 @@ using namespace std;
 
 
 // Constructor definition
-Image::Image() : data(nullptr), width(0), height(0), channels(0) {}
-
+//Image::Image() : data(nullptr), width(0), height(0), channels(0) {}
+Image::Image() : width(0), height(0), channels(0), data(nullptr) {}
 
 void Image::image(const char *path){
     // Load the image and store it in the class members
