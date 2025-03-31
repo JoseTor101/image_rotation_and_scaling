@@ -17,6 +17,7 @@ public:
   void image(const char *); // Load an image
   void extractChannels();   // Extract RGB channels
   void rotateImage(int angle);
+  void scaleImage(float scaleFactor);
   void saveImage(const string &outputPath); // Save image
 
 private:
