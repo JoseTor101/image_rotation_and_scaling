@@ -1,24 +1,45 @@
 #include "image.h"
-#include <chrono>
 #include <Eigen/Dense>
+#include <chrono>
 #include <cmath>
 #include <cstring>
-#include <iostream>
 #include <fstream>
+#include <iostream>
 #include <sys/resource.h>
 
 using namespace std;
 
+/**
+ * @brief Retrieves the memory usage of the current program in MB.
+ *
+ * This function uses `getrusage` to get memory statistics and converts
+ * the result from KB to MB.
+ *
+ * @return double The memory usage in MB.
+ */
 double getMemoryUsageMB() {
   struct rusage usage;
   getrusage(RUSAGE_SELF, &usage);
   return usage.ru_maxrss / 1024.0; // Convert KB to MB
 }
 
-// Constructor definition
-// Image::Image() : data(nullptr), width(0), height(0), channels(0) {}
+/**
+ * @brief Default constructor for the Image class.
+ *
+ * Initializes the image properties such as width, height, channels, and
+ * sets the data pointer to nullptr.
+ */
 Image::Image() : width(0), height(0), channels(0), data(nullptr) {}
 
+/**
+ * @brief Loads an image from the specified file path.
+ *
+ * This function uses the `stbi_load` function to load the image and store
+ * its data in the class. It prints the image's dimensions and the number
+ * of color channels. If an error occurs, it outputs an error message.
+ *
+ * @param path The file path of the image to load.
+ */
 void Image::image(const char *path) {
   // Load the image and store it in the class members
   data = stbi_load(path, &width, &height, &channels, 0);
@@ -37,6 +58,13 @@ void Image::image(const char *path) {
   }
 }
 
+/**
+ * @brief Extracts the RGB channels of the loaded image.
+ *
+ * This function extracts the red, green, and blue color channels from the
+ * image and stores them into separate vectors. The function prints a
+ * success message once the channels are extracted.
+ */
 void Image::extractChannels() {
 
   canalRojo.resize(height, vector<int>(width));
@@ -54,6 +82,16 @@ void Image::extractChannels() {
   cout << "Canales extraídos.\n";
 }
 
+/**
+ * @brief Rotates the image by a specified angle.
+ *
+ * This function performs a 2D rotation transformation on the image. The
+ * angle is provided in degrees, and the function calculates the new
+ * bounding box size to accommodate the rotated image. The rotated image is
+ * then saved to the disk.
+ *
+ * @param angle The angle by which to rotate the image in degrees.
+ */
 void Image::rotateImage(int angle) {
   // Convert angle to radians
   double radians = angle * M_PI / 180.0;
@@ -110,10 +148,19 @@ void Image::rotateImage(int angle) {
   rotatedImage.saveImage("./output/rotated.jpg");
 }
 
+/**
+ * @brief Scales the image by a specified factor.
+ *
+ * This function resizes the image based on a scale factor. It performs
+ * bilinear interpolation to ensure the image is scaled smoothly. The scaled
+ * image is then saved to the disk.
+ *
+ * @param scaleFactor The factor by which to scale the image.
+ */
 void Image::scaleImage(float scaleFactor) {
   if (scaleFactor <= 0) {
-      cerr << "El factor de escala debe ser mayor que 0." << endl;
-      return;
+    cerr << "El factor de escala debe ser mayor que 0." << endl;
+    return;
   }
 
   // Calculate new size
@@ -132,36 +179,52 @@ void Image::scaleImage(float scaleFactor) {
 
   // Interpolation
   for (int i = 0; i < newHeight; i++) {
-      for (int j = 0; j < newWidth; j++) {
-          float srcX = j * scaleX;
-          float srcY = i * scaleY;
+    for (int j = 0; j < newWidth; j++) {
+      float srcX = j * scaleX;
+      float srcY = i * scaleY;
 
-          int x1 = static_cast<int>(srcX);
-          int y1 = static_cast<int>(srcY);
-          int x2 = min(x1 + 1, width - 1);
-          int y2 = min(y1 + 1, height - 1);
+      int x1 = static_cast<int>(srcX);
+      int y1 = static_cast<int>(srcY);
+      int x2 = min(x1 + 1, width - 1);
+      int y2 = min(y1 + 1, height - 1);
 
-          float dx = srcX - x1;
-          float dy = srcY - y1;
+      float dx = srcX - x1;
+      float dy = srcY - y1;
 
-          for (int c = 0; c < channels; c++) {
-              float pixelValue =
-                  (1 - dx) * (1 - dy) * data[(y1 * width + x1) * channels + c] +
-                  dx * (1 - dy) * data[(y1 * width + x2) * channels + c] +
-                  (1 - dx) * dy * data[(y2 * width + x1) * channels + c] +
-                  dx * dy * data[(y2 * width + x2) * channels + c];
+      for (int c = 0; c < channels; c++) {
+        float pixelValue =
+            (1 - dx) * (1 - dy) * data[(y1 * width + x1) * channels + c] +
+            dx * (1 - dy) * data[(y1 * width + x2) * channels + c] +
+            (1 - dx) * dy * data[(y2 * width + x1) * channels + c] +
+            dx * dy * data[(y2 * width + x2) * channels + c];
 
-              scaledImage.data[(i * newWidth + j) * channels + c] = static_cast<unsigned char>(pixelValue);
-          }
+        scaledImage.data[(i * newWidth + j) * channels + c] =
+            static_cast<unsigned char>(pixelValue);
       }
+    }
   }
 
-  cout << "Escalado completado! Nuevo tamaño: " << newWidth << " x " << newHeight << endl;
+  cout << "Escalado completado! Nuevo tamaño: " << newWidth << " x "
+       << newHeight << endl;
 
   scaledImage.saveImage("./output/scaled.jpg");
 }
 
-void Image::transformImage(const string &inputPath, const string &outputPath, int angle, float scaleFactor, bool buddySystem) {
+/**
+ * @brief Transforms the image by applying rotation and scaling.
+ *
+ * This function combines both rotation and scaling transformations
+ * in sequence. It also tracks the time and memory usage of the process.
+ *
+ * @param inputPath The path to the input image.
+ * @param outputPath The path where the transformed image will be saved.
+ * @param angle The rotation angle in degrees.
+ * @param scaleFactor The scaling factor.
+ * @param buddySystem A flag indicating whether to use the buddy system for
+ * memory allocation.
+ */
+void Image::transformImage(const string &inputPath, const string &outputPath,
+                           int angle, float scaleFactor, bool buddySystem) {
   using namespace std::chrono;
 
   // Start measuring time
@@ -183,18 +246,21 @@ void Image::transformImage(const string &inputPath, const string &outputPath, in
   cout << "+---------------------------+\n";
   cout << " Archivo entrada: " << inputPath << " \n";
   cout << " Archivo salida: " << outputPath << " \n";
-  cout << " Modo de asignación de memoria : " << (buddySystem ? "Buddy system" : "Sin Buddy system") << " \n";
+  cout << " Modo de asignación de memoria : "
+       << (buddySystem ? "Buddy system" : "Sin Buddy system") << " \n";
   cout << "+---------------------------+\n";
   cout << " Dimensiones originales: " << width << "x" << height << " \n";
 
   double radians = angle * M_PI / 180.0;
-  
+
   Eigen::Matrix2f transformMatrix;
   transformMatrix << scaleFactor * cos(radians), -scaleFactor * sin(radians),
-                     scaleFactor * sin(radians),  scaleFactor * cos(radians);
-  
-  int newWidth = abs(width * scaleFactor * cos(radians)) + abs(height * scaleFactor * sin(radians));
-  int newHeight = abs(width * scaleFactor * sin(radians)) + abs(height * scaleFactor * cos(radians));
+      scaleFactor * sin(radians), scaleFactor * cos(radians);
+
+  int newWidth = abs(width * scaleFactor * cos(radians)) +
+                 abs(height * scaleFactor * sin(radians));
+  int newHeight = abs(width * scaleFactor * sin(radians)) +
+                  abs(height * scaleFactor * cos(radians));
   cout << " Dimensiones finales: " << newWidth << "x" << newHeight << " \n";
   cout << " Canales: " << channels << " (RGB)\n";
   cout << " Ángulo de rotación: " << angle << " grados\n";
@@ -210,24 +276,25 @@ void Image::transformImage(const string &inputPath, const string &outputPath, in
   Eigen::Vector2f centerNew(newWidth / 2.0, newHeight / 2.0);
 
   for (int i = 0; i < newHeight; i++) {
-      for (int j = 0; j < newWidth; j++) {
-          Eigen::Vector2f newCoords(j, i);
-          Eigen::Vector2f oldCoords = transformMatrix.inverse() * (newCoords - centerNew) + centerOriginal;
+    for (int j = 0; j < newWidth; j++) {
+      Eigen::Vector2f newCoords(j, i);
+      Eigen::Vector2f oldCoords =
+          transformMatrix.inverse() * (newCoords - centerNew) + centerOriginal;
 
-          int x = round(oldCoords[0]);
-          int y = round(oldCoords[1]);
+      int x = round(oldCoords[0]);
+      int y = round(oldCoords[1]);
 
-          if (x >= 0 && x < width && y >= 0 && y < height) {
-              for (int c = 0; c < channels; c++) {
-                  transformedImage.data[(i * newWidth + j) * channels + c] =
-                      data[(y * width + x) * channels + c];
-              }
-          } else {
-              for (int c = 0; c < channels; c++) {
-                  transformedImage.data[(i * newWidth + j) * channels + c] = 0;
-              }
-          }
+      if (x >= 0 && x < width && y >= 0 && y < height) {
+        for (int c = 0; c < channels; c++) {
+          transformedImage.data[(i * newWidth + j) * channels + c] =
+              data[(y * width + x) * channels + c];
+        }
+      } else {
+        for (int c = 0; c < channels; c++) {
+          transformedImage.data[(i * newWidth + j) * channels + c] = 0;
+        }
       }
+    }
   }
 
   // End measuring time
@@ -241,19 +308,26 @@ void Image::transformImage(const string &inputPath, const string &outputPath, in
   cout << "+---------------------------+\n";
   cout << "   TIEMPO DE PROCESAMIENTO   \n";
   cout << "+---------------------------+\n";
-  
+
   cout << "- Sin Buddy system: " << duration.count() << " ms" << endl;
-  cout << "- Con Buddy system: " << "[ ]" << " ms" << endl;
-  
+  cout << "- Con Buddy system: "
+       << "[ ]"
+       << " ms" << endl;
+
   // Display memory usage
   cout << "- Memoria utilizada: " << memoryUsed << " MB\n";
 
   transformedImage.saveImage(outputPath);
 }
 
-
-
-// Save the transformed image
+/**
+ * @brief Saves the image data to the specified file path.
+ *
+ * This function writes the image to the disk in JPG format. If the data is
+ * invalid, an error message is displayed.
+ *
+ * @param outputPath The file path where the image will be saved.
+ */
 void Image::saveImage(const string &outputPath) {
   if (!data) {
     cerr << "[ERROR] No hay datos de imagen disponibles para guardar\n";
@@ -267,10 +341,14 @@ void Image::saveImage(const string &outputPath) {
   }
 }
 
-// Destructor definition
+/**
+ * @brief Destructor for the Image class.
+ *
+ * Frees the allocated image data memory to avoid memory leaks.
+ */
 Image::~Image() {
   if (data) {
     stbi_image_free(data);
-    data = nullptr; // Avoids dangling pointer issues
+    data = nullptr;
   }
 }
