@@ -310,9 +310,7 @@ void Image::transformImage(const string &inputPath, const string &outputPath,
   cout << "+---------------------------+\n";
 
   cout << "- Sin Buddy system: " << duration.count() << " ms" << endl;
-  cout << "- Con Buddy system: "
-       << "[ ]"
-       << " ms" << endl;
+  cout << "- Con Buddy system: " << "[ ]" << " ms" << endl;
 
   // Display memory usage
   cout << "- Memoria utilizada: " << memoryUsed << " MB\n";
