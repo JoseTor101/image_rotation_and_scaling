@@ -94,6 +94,57 @@ void Image::rotateImage(int angle) {
   rotatedImage.saveImage("./output/rotated.jpg");
 }
 
+void Image::scaleImage(float scaleFactor) {
+  if (scaleFactor <= 0) {
+      cerr << "El factor de escala debe ser mayor que 0." << endl;
+      return;
+  }
+
+  // Calculate new size
+  int newWidth = static_cast<int>(width * scaleFactor);
+  int newHeight = static_cast<int>(height * scaleFactor);
+
+  // Create new blank image data
+  Image scaledImage;
+  scaledImage.data = new unsigned char[newWidth * newHeight * channels]();
+  scaledImage.width = newWidth;
+  scaledImage.height = newHeight;
+  scaledImage.channels = channels;
+
+  float scaleX = static_cast<float>(width) / newWidth;
+  float scaleY = static_cast<float>(height) / newHeight;
+
+  // Interpolation
+  for (int i = 0; i < newHeight; i++) {
+      for (int j = 0; j < newWidth; j++) {
+          float srcX = j * scaleX;
+          float srcY = i * scaleY;
+
+          int x1 = static_cast<int>(srcX);
+          int y1 = static_cast<int>(srcY);
+          int x2 = min(x1 + 1, width - 1);
+          int y2 = min(y1 + 1, height - 1);
+
+          float dx = srcX - x1;
+          float dy = srcY - y1;
+
+          for (int c = 0; c < channels; c++) {
+              float pixelValue =
+                  (1 - dx) * (1 - dy) * data[(y1 * width + x1) * channels + c] +
+                  dx * (1 - dy) * data[(y1 * width + x2) * channels + c] +
+                  (1 - dx) * dy * data[(y2 * width + x1) * channels + c] +
+                  dx * dy * data[(y2 * width + x2) * channels + c];
+
+              scaledImage.data[(i * newWidth + j) * channels + c] = static_cast<unsigned char>(pixelValue);
+          }
+      }
+  }
+
+  cout << "Escalado completado! Nuevo tamaño: " << newWidth << " x " << newHeight << endl;
+
+  scaledImage.saveImage("./output/scaled.jpg");
+}
+
 // Save the transformed image
 void Image::saveImage(const string &outputPath) {
   if (!data) {
