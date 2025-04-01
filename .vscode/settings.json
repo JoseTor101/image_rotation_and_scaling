@@ -1,0 +1,7 @@
+{
+    "files.associations": {
+        "*.cpp": "cpp",
+        "*.asm": "asm-list-markdown-codeblock",
+        "iostream": "cpp"
+    }
+}

@@ -18,6 +18,7 @@ public:
   void extractChannels();   // Extract RGB channels
   void rotateImage(int angle);
   void scaleImage(float scaleFactor);
+  void transformImage(const string &inputPath, const string &outputPath, int angle, float scaleFactor, bool buddySystem);
   void saveImage(const string &outputPath); // Save image
 
 private:
