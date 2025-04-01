@@ -1,1 +1,0 @@
-/usr/bin/c++  -Wall -Wextra -g -Wno-missing-field-initializers -Wl,--dependency-file=CMakeFiles/ImageRotationScaling.dir/link.d CMakeFiles/ImageRotationScaling.dir/main.cpp.o CMakeFiles/ImageRotationScaling.dir/image.cpp.o CMakeFiles/ImageRotationScaling.dir/stb_wrapper.cpp.o -o ImageRotationScaling

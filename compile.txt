@@ -1,2 +1,10 @@
-
  g++ -o main main.cpp image.cpp stb_wrapper.cpp -I. -I/usr/include/eigen3
+
+Generate Build folder:
+
+mkdir build 
+cd build
+cmake ..
+
+cd ..
+make
