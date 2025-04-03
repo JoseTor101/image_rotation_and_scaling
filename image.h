@@ -28,6 +28,7 @@ private:
   vector<vector<int>> canalAzul;
   int width, height, channels;
   unsigned char *data;
+  bool useBuddySystem;
 };
 
 #endif // IMAGEN_H
