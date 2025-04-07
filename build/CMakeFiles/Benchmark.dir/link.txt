@@ -1,1 +1,1 @@
-/usr/bin/c++   -Wall -Wextra -g -Wno-missing-field-initializers   CMakeFiles/Benchmark.dir/benchmark.cpp.o CMakeFiles/Benchmark.dir/image.cpp.o CMakeFiles/Benchmark.dir/stb_wrapper.cpp.o  -o Benchmark 
+/usr/bin/c++  -Wall -Wextra -g -Wno-missing-field-initializers -Wl,--dependency-file=CMakeFiles/Benchmark.dir/link.d CMakeFiles/Benchmark.dir/benchmark.cpp.o CMakeFiles/Benchmark.dir/image.cpp.o CMakeFiles/Benchmark.dir/stb_wrapper.cpp.o -o Benchmark

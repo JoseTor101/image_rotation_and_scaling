@@ -379,17 +379,13 @@ void Image::transformImage(const string &inputPath, const string &outputPath,
     cout << "+---------------------------+\n";
 
     if (useBuddySystem) {
-      cout << "- Sin Buddy system: "
-           << "[ ]"
-           << " ms" << endl;
+      cout << "- Sin Buddy system: " << "[ ]" << " ms" << endl;
       cout << "- Con Buddy system: " << duration.count() << " ms" << endl;
       cout << "- Tiempo de asignación con Buddy: " << buddyDuration.count()
            << " ms" << endl;
     } else {
       cout << "- Sin Buddy system: " << duration.count() << " ms" << endl;
-      cout << "- Con Buddy system: "
-           << "[ ]"
-           << " ms" << endl;
+      cout << "- Con Buddy system: " << "[ ]" << " ms" << endl;
     }
 
     // Display memory usage
