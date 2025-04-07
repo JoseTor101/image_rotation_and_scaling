@@ -1,9 +1,12 @@
 #include "image.h"
+#include "buddy_memory.h"
 #include <cstdlib> // For std::stoi()
 #include <cstring> // For strcmp
 #include <iostream>
 #include <locale>
 #include <vector>
+
+extern BuddyMemoryManager* buddyManager;
 
 /**
  * @brief Main function to handle image transformation operations.
@@ -48,6 +51,11 @@ int main(int argc, char *argv[]) {
 
   // Apply transformations
   img.transformImage(inputPath, outputPath, angle, scaleFactor, buddySystem);
+
+  if (buddyManager != nullptr) {
+    delete buddyManager;
+    buddyManager = nullptr;
+  }
 
   return 0;
 }
