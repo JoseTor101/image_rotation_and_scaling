@@ -52,6 +52,8 @@ After building the project, you can run the executable with the following comman
 ### Example
 ```bash
 ./ImageRotationScaling -entrada input.jpg -salida output.jpg -angulo 45 -escalar 1.2 -buddy
+
+./ImageRotationScaling -entrada ../test/fish.jpg -salida ../output/output.jpg -angulo 45 -escalar 1.2 -buddy
 ```
 This rotates `input.jpg` by 45 degrees, scales it by 1.2x, and uses the buddy system for memory allocation.
 

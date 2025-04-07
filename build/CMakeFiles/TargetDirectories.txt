@@ -1,3 +1,4 @@
-/home/runner/work/image_rotation_and_scaling/image_rotation_and_scaling/build/CMakeFiles/ImageRotationScaling.dir
-/home/runner/work/image_rotation_and_scaling/image_rotation_and_scaling/build/CMakeFiles/edit_cache.dir
-/home/runner/work/image_rotation_and_scaling/image_rotation_and_scaling/build/CMakeFiles/rebuild_cache.dir
+/home/jatz/operative_systems/parcial2/image_rotation_scaling/build/CMakeFiles/rebuild_cache.dir
+/home/jatz/operative_systems/parcial2/image_rotation_scaling/build/CMakeFiles/edit_cache.dir
+/home/jatz/operative_systems/parcial2/image_rotation_scaling/build/CMakeFiles/Benchmark.dir
+/home/jatz/operative_systems/parcial2/image_rotation_scaling/build/CMakeFiles/ImageRotationScaling.dir
