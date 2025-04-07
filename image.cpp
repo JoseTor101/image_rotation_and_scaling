@@ -1,16 +1,17 @@
 #include "image.h"
+#include "benchmark.h"
 #include "buddy_memory.h"
-#include <eigen3/Eigen/Dense>
 #include <chrono>
 #include <cmath>
 #include <cstring>
+#include <eigen3/Eigen/Dense>
 #include <fstream>
 #include <iostream>
 #include <sys/resource.h>
 
 using namespace std;
 
-BuddyMemoryManager* buddyManager = nullptr;
+BuddyMemoryManager *buddyManager = nullptr;
 
 /**
  * @brief Retrieves the memory usage of the current program in MB.
@@ -32,7 +33,8 @@ double getMemoryUsageMB() {
  * Initializes the image properties such as width, height, channels, and
  * sets the data pointer to nullptr.
  */
-Image::Image() : width(0), height(0), channels(0), data(nullptr), useBuddySystem(false) {}
+Image::Image()
+    : width(0), height(0), channels(0), data(nullptr), useBuddySystem(false) {}
 
 /**
  * @brief Loads an image from the specified file path.
@@ -54,7 +56,8 @@ void Image::image(const char *path) {
     cout << " Dimensiones: " << width << " x " << height << "\n";
     cout << " Canales: " << channels << " (RGB) \n";
     if (buddyManager == nullptr) {
-      // Allocate enough memory for transformations (e.g., 4x the original image size)
+      // Allocate enough memory for transformations (e.g., 4x the original image
+      // size)
       size_t estimatedSize = width * height * channels * 4;
       buddyManager = new BuddyMemoryManager(estimatedSize);
     }
@@ -116,7 +119,8 @@ void Image::rotateImage(int angle) {
   Image rotatedImage;
   rotatedImage.useBuddySystem = useBuddySystem;
   if (useBuddySystem && buddyManager != nullptr) {
-    rotatedImage.data = static_cast<unsigned char*>(buddyManager->allocate(newWidth * newHeight * channels));
+    rotatedImage.data = static_cast<unsigned char *>(
+        buddyManager->allocate(newWidth * newHeight * channels));
     memset(rotatedImage.data, 0, newWidth * newHeight * channels);
   } else {
     rotatedImage.data = new unsigned char[newWidth * newHeight * channels]();
@@ -162,7 +166,8 @@ void Image::rotateImage(int angle) {
 
   rotatedImage.saveImage("./output/rotated.jpg");
 
-  if (useBuddySystem && buddyManager != nullptr && buddyManager->isManaged(rotatedImage.data)) {
+  if (useBuddySystem && buddyManager != nullptr &&
+      buddyManager->isManaged(rotatedImage.data)) {
     buddyManager->deallocate(rotatedImage.data);
     rotatedImage.data = nullptr;
   }
@@ -190,14 +195,15 @@ void Image::scaleImage(float scaleFactor) {
   // Create new blank image data
   Image scaledImage;
   scaledImage.useBuddySystem = useBuddySystem;
-  
+
   if (useBuddySystem && buddyManager != nullptr) {
-    scaledImage.data = static_cast<unsigned char*>(buddyManager->allocate(newWidth * newHeight * channels));
+    scaledImage.data = static_cast<unsigned char *>(
+        buddyManager->allocate(newWidth * newHeight * channels));
     memset(scaledImage.data, 0, newWidth * newHeight * channels);
   } else {
     scaledImage.data = new unsigned char[newWidth * newHeight * channels]();
   }
-  
+
   scaledImage.width = newWidth;
   scaledImage.height = newHeight;
   scaledImage.channels = channels;
@@ -236,7 +242,8 @@ void Image::scaleImage(float scaleFactor) {
        << newHeight << endl;
 
   scaledImage.saveImage("./output/scaled.jpg");
-  if (useBuddySystem && buddyManager != nullptr && buddyManager->isManaged(scaledImage.data)) {
+  if (useBuddySystem && buddyManager != nullptr &&
+      buddyManager->isManaged(scaledImage.data)) {
     buddyManager->deallocate(scaledImage.data);
     scaledImage.data = nullptr;
   }
@@ -256,7 +263,8 @@ void Image::scaleImage(float scaleFactor) {
  * memory allocation.
  */
 void Image::transformImage(const string &inputPath, const string &outputPath,
-                           int angle, float scaleFactor, bool buddySystem) {
+                           int angle, float scaleFactor, bool buddySystem,
+                           bool showOutput) {
   using namespace std::chrono;
 
   // Set buddy system flag
@@ -272,19 +280,24 @@ void Image::transformImage(const string &inputPath, const string &outputPath,
   image(inputPath.c_str());
 
   if (scaleFactor <= 0) {
-    cerr << "El factor de escala debe ser mayor que 0." << endl;
+    if (showOutput) {
+      cerr << "El factor de escala debe ser mayor que 0." << endl;
+    }
     return;
   }
 
-  cout << "+---------------------------+\n";
-  cout << "       PROCESAMIENTO        \n";
-  cout << "+---------------------------+\n";
-  cout << " Archivo entrada: " << inputPath << " \n";
-  cout << " Archivo salida: " << outputPath << " \n";
-  cout << " Modo de asignación de memoria : "
-       << (buddySystem ? "Buddy system" : "Sin Buddy system") << " \n";
-  cout << "+---------------------------+\n";
-  cout << " Dimensiones originales: " << width << "x" << height << " \n";
+  if (showOutput) {
+    cout << "\033[32m+---------------------------+\n";
+    cout << "       PROCESAMIENTO        \n";
+    cout << "+---------------------------+\n";
+    cout << " Archivo entrada: " << inputPath << " \n";
+    cout << " Archivo salida: " << outputPath << " \n";
+    cout << " Modo de asignación de memoria : "
+         << (buddySystem ? "Buddy system" : "Sin Buddy system") << " \n";
+    cout << "+---------------------------+\n";
+    cout << " Dimensiones originales: " << width << "x" << height
+         << " \n\033[0m";
+  }
 
   double radians = angle * M_PI / 180.0;
 
@@ -296,27 +309,33 @@ void Image::transformImage(const string &inputPath, const string &outputPath,
                  abs(height * scaleFactor * sin(radians));
   int newHeight = abs(width * scaleFactor * sin(radians)) +
                   abs(height * scaleFactor * cos(radians));
-  cout << " Dimensiones finales: " << newWidth << "x" << newHeight << " \n";
-  cout << " Canales: " << channels << " (RGB)\n";
-  cout << " Ángulo de rotación: " << angle << " grados\n";
-  cout << " Factor de escalado: " << scaleFactor << " \n";
+
+  if (showOutput) {
+    cout << "\033[32m Dimensiones finales: " << newWidth << "x" << newHeight
+         << " \n";
+    cout << " Canales: " << channels << " (RGB)\n";
+    cout << " Ángulo de rotación: " << angle << " grados\n";
+    cout << " Factor de escalado: " << scaleFactor << " \n\033[0m";
+  }
 
   Image transformedImage;
   transformedImage.useBuddySystem = useBuddySystem;
 
   // Start measuring time for the specific memory allocation method
   auto buddyStart = high_resolution_clock::now();
-  
+
   if (useBuddySystem && buddyManager != nullptr) {
-    transformedImage.data = static_cast<unsigned char*>(buddyManager->allocate(newWidth * newHeight * channels));
+    transformedImage.data = static_cast<unsigned char *>(
+        buddyManager->allocate(newWidth * newHeight * channels));
     memset(transformedImage.data, 0, newWidth * newHeight * channels);
   } else {
-    transformedImage.data = new unsigned char[newWidth * newHeight * channels]();
+    transformedImage.data =
+        new unsigned char[newWidth * newHeight * channels]();
   }
 
   auto buddyEnd = high_resolution_clock::now();
   auto buddyDuration = duration_cast<milliseconds>(buddyEnd - buddyStart);
-  
+
   transformedImage.width = newWidth;
   transformedImage.height = newHeight;
   transformedImage.channels = channels;
@@ -354,25 +373,33 @@ void Image::transformImage(const string &inputPath, const string &outputPath,
   double memoryAfter = getMemoryUsageMB();
   double memoryUsed = memoryAfter - memoryBefore;
 
-  cout << "+---------------------------+\n";
-  cout << "   TIEMPO DE PROCESAMIENTO   \n";
-  cout << "+---------------------------+\n";
+  if (showOutput) {
+    cout << "\033[32m+---------------------------+\n";
+    cout << "   TIEMPO DE PROCESAMIENTO   \n";
+    cout << "+---------------------------+\n";
 
-  if (useBuddySystem) {
-    cout << "- Sin Buddy system: " << "[ ]" << " ms" << endl;
-    cout << "- Con Buddy system: " << duration.count() << " ms" << endl;
-    cout << "- Tiempo de asignación con Buddy: " << buddyDuration.count() << " ms" << endl;
-  } else {
-    cout << "- Sin Buddy system: " << duration.count() << " ms" << endl;
-    cout << "- Con Buddy system: " << "[ ]" << " ms" << endl;
+    if (useBuddySystem) {
+      cout << "- Sin Buddy system: "
+           << "[ ]"
+           << " ms" << endl;
+      cout << "- Con Buddy system: " << duration.count() << " ms" << endl;
+      cout << "- Tiempo de asignación con Buddy: " << buddyDuration.count()
+           << " ms" << endl;
+    } else {
+      cout << "- Sin Buddy system: " << duration.count() << " ms" << endl;
+      cout << "- Con Buddy system: "
+           << "[ ]"
+           << " ms" << endl;
+    }
+
+    // Display memory usage
+    cout << "- Memoria utilizada: " << memoryUsed << " MB\n\033[0m";
   }
-
-  // Display memory usage
-  cout << "- Memoria utilizada: " << memoryUsed << " MB\n";
 
   transformedImage.saveImage(outputPath);
 
-  if (useBuddySystem && buddyManager != nullptr && buddyManager->isManaged(transformedImage.data)) {
+  if (useBuddySystem && buddyManager != nullptr &&
+      buddyManager->isManaged(transformedImage.data)) {
     buddyManager->deallocate(transformedImage.data);
     transformedImage.data = nullptr;
   }
@@ -406,7 +433,8 @@ void Image::saveImage(const string &outputPath) {
  */
 Image::~Image() {
   if (data) {
-    if (useBuddySystem && buddyManager != nullptr && buddyManager->isManaged(data)) {
+    if (useBuddySystem && buddyManager != nullptr &&
+        buddyManager->isManaged(data)) {
       buddyManager->deallocate(data);
     } else {
       stbi_image_free(data);

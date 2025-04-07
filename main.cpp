@@ -1,12 +1,13 @@
-#include "image.h"
 #include "buddy_memory.h"
-#include <cstdlib> // For std::stoi()
+#include "image.h"
+#include <cstdlib> // For std::stoi() and std::system()
 #include <cstring> // For strcmp
 #include <iostream>
 #include <locale>
+#include <sstream> // For std::ostringstream
 #include <vector>
 
-extern BuddyMemoryManager* buddyManager;
+extern BuddyMemoryManager *buddyManager;
 
 /**
  * @brief Main function to handle image transformation operations.
@@ -50,11 +51,24 @@ int main(int argc, char *argv[]) {
   }
 
   // Apply transformations
-  img.transformImage(inputPath, outputPath, angle, scaleFactor, buddySystem);
+  img.transformImage(inputPath, outputPath, angle, scaleFactor, buddySystem,
+                     true);
 
   if (buddyManager != nullptr) {
     delete buddyManager;
     buddyManager = nullptr;
+  }
+
+  // Construct the command with parameters
+  std::ostringstream command;
+  command << "./Benchmark -entrada " << inputPath << " -angulo " << angle
+          << " -escalar " << scaleFactor;
+
+  // Execute Benchmarks
+  int result = std::system(command.str().c_str());
+  if (result != 0) {
+    std::cerr << "Error: Failed to execute ./Benchmark" << std::endl;
+    return result;
   }
 
   return 0;

@@ -1,0 +1,1 @@
+./ImageRotationScaling -entrada ../test/fish.jpg -salida ../output/output.jpg -angulo 45 -escalar 1.2 -buddy
