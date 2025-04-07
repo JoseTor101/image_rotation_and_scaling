@@ -16,5 +16,23 @@
   "command": "/usr/bin/c++  -I/home/runner/work/image_rotation_and_scaling/image_rotation_and_scaling -I/usr/include/eigen3  -Wall -Wextra -g -Wno-missing-field-initializers -std=c++14 -o CMakeFiles/ImageRotationScaling.dir/stb_wrapper.cpp.o -c /home/runner/work/image_rotation_and_scaling/image_rotation_and_scaling/stb_wrapper.cpp",
   "file": "/home/runner/work/image_rotation_and_scaling/image_rotation_and_scaling/stb_wrapper.cpp",
   "output": "CMakeFiles/ImageRotationScaling.dir/stb_wrapper.cpp.o"
+},
+{
+  "directory": "/home/runner/work/image_rotation_and_scaling/image_rotation_and_scaling/build",
+  "command": "/usr/bin/c++  -I/home/runner/work/image_rotation_and_scaling/image_rotation_and_scaling -I/usr/include/eigen3  -Wall -Wextra -g -Wno-missing-field-initializers -std=c++14 -o CMakeFiles/Benchmark.dir/benchmark.cpp.o -c /home/runner/work/image_rotation_and_scaling/image_rotation_and_scaling/benchmark.cpp",
+  "file": "/home/runner/work/image_rotation_and_scaling/image_rotation_and_scaling/benchmark.cpp",
+  "output": "CMakeFiles/Benchmark.dir/benchmark.cpp.o"
+},
+{
+  "directory": "/home/runner/work/image_rotation_and_scaling/image_rotation_and_scaling/build",
+  "command": "/usr/bin/c++  -I/home/runner/work/image_rotation_and_scaling/image_rotation_and_scaling -I/usr/include/eigen3  -Wall -Wextra -g -Wno-missing-field-initializers -std=c++14 -o CMakeFiles/Benchmark.dir/image.cpp.o -c /home/runner/work/image_rotation_and_scaling/image_rotation_and_scaling/image.cpp",
+  "file": "/home/runner/work/image_rotation_and_scaling/image_rotation_and_scaling/image.cpp",
+  "output": "CMakeFiles/Benchmark.dir/image.cpp.o"
+},
+{
+  "directory": "/home/runner/work/image_rotation_and_scaling/image_rotation_and_scaling/build",
+  "command": "/usr/bin/c++  -I/home/runner/work/image_rotation_and_scaling/image_rotation_and_scaling -I/usr/include/eigen3  -Wall -Wextra -g -Wno-missing-field-initializers -std=c++14 -o CMakeFiles/Benchmark.dir/stb_wrapper.cpp.o -c /home/runner/work/image_rotation_and_scaling/image_rotation_and_scaling/stb_wrapper.cpp",
+  "file": "/home/runner/work/image_rotation_and_scaling/image_rotation_and_scaling/stb_wrapper.cpp",
+  "output": "CMakeFiles/Benchmark.dir/stb_wrapper.cpp.o"
 }
 ]

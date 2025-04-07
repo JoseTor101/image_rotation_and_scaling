@@ -16,15 +16,22 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -g -Wno-missing-field-init
 include_directories(${CMAKE_SOURCE_DIR})
 include_directories(/usr/include/eigen3)
 
-# Source files
-set(SOURCES
+# Source files for the main application
+set(MAIN_SOURCES
     main.cpp
     image.cpp
     stb_wrapper.cpp
 )
 
-# Add executable
-add_executable(${PROJECT_NAME} ${SOURCES})
+# Source files for the benchmark
+set(BENCHMARK_SOURCES
+    benchmark.cpp
+    image.cpp
+    stb_wrapper.cpp
+)
 
-# Link libraries (if needed)
-# For now, no additional libraries are linked. Add target_link_libraries if required.
+# Add executable for the main application
+add_executable(ImageRotationScaling ${MAIN_SOURCES})
+
+# Add executable for the benchmark
+add_executable(Benchmark ${BENCHMARK_SOURCES})
