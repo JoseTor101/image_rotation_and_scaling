@@ -21,6 +21,10 @@ public:
   void transformImage(const string &inputPath, const string &outputPath,
                       int angle, float scaleFactor, bool buddySystem);
   void saveImage(const string &outputPath); // Save image
+  
+  int getWidth() const { return width; }
+  int getHeight() const { return height; }
+  int getChannels() const { return channels; }
 
 private:
   vector<vector<int>> canalRojo;
