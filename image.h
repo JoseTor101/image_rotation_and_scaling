@@ -26,7 +26,7 @@ public:
   int getWidth() const { return width; }
   int getHeight() const { return height; }
   int getChannels() const { return channels; }
-  unsigned char* getData() { return data; }  
+  unsigned char *getData() { return data; }
 
 private:
   vector<vector<int>> canalRojo;

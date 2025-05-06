@@ -70,9 +70,9 @@ int main(int argc, char *argv[]) {
   cout << "\n";
 
   input == "y" ? runBenchmark = true : runBenchmark = false;
-  
-  if(runBenchmark){
-  // Construct the command with parameters
+
+  if (runBenchmark) {
+    // Construct the command with parameters
     std::ostringstream command;
     command << "./Benchmark -entrada " << inputPath << " -angulo " << angle
             << " -escalar " << scaleFactor << " -divisiones " << numDivisions;
@@ -83,9 +83,9 @@ int main(int argc, char *argv[]) {
       std::cerr << "Error: Failed to execute ./Benchmark" << std::endl;
       return result;
     }
-  }else {
-    cout << "☑ Fin del programa. " <<endl;
+  } else {
+    cout << "☑ Fin del programa. " << endl;
   }
-  
+
   return 0;
 }
