@@ -4,9 +4,11 @@ on:
   push:
     branches:
       - develop
+      - parcial3
   pull_request:
     branches:
       - develop
+      - parcial3
 
 permissions:
   contents: write
