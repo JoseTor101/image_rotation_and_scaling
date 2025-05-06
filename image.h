@@ -20,12 +20,13 @@ public:
   void scaleImage(float scaleFactor);
   void transformImage(const string &inputPath, const string &outputPath,
                       int angle, float scaleFactor, bool buddySystem,
-                      bool showOutput);
+                      bool showOutput, int numDivisions);
   void saveImage(const string &outputPath); // Save image
 
   int getWidth() const { return width; }
   int getHeight() const { return height; }
   int getChannels() const { return channels; }
+  unsigned char* getData() { return data; }  
 
 private:
   vector<vector<int>> canalRojo;

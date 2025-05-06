@@ -1,7 +1,9 @@
 #include "image.h"
 #include "benchmark.h"
 #include "buddy_memory.h"
+#include <omp.h>
 #include <chrono>
+#include <vector>
 #include <cmath>
 #include <cstring>
 #include <eigen3/Eigen/Dense>
@@ -21,7 +23,8 @@ BuddyMemoryManager *buddyManager = nullptr;
  *
  * @return double The memory usage in MB.
  */
-double getMemoryUsageMB() {
+double getMemoryUsageMB()
+{
   struct rusage usage;
   getrusage(RUSAGE_SELF, &usage);
   return usage.ru_maxrss / 1024.0; // Convert KB to MB
@@ -45,23 +48,28 @@ Image::Image()
  *
  * @param path The file path of the image to load.
  */
-void Image::image(const char *path) {
+void Image::image(const char *path)
+{
   // Load the image and store it in the class members
   data = stbi_load(path, &width, &height, &channels, 0);
 
-  if (data) {
+  if (data)
+  {
     cout << "+---------------------------+\n";
     cout << "       Imagen Cargada      \n";
     cout << "+---------------------------+\n";
     cout << " Dimensiones: " << width << " x " << height << "\n";
     cout << " Canales: " << channels << " (RGB) \n";
-    if (buddyManager == nullptr) {
+    if (buddyManager == nullptr)
+    {
       // Allocate enough memory for transformations (e.g., 4x the original image
       // size)
       size_t estimatedSize = width * height * channels * 4;
       buddyManager = new BuddyMemoryManager(estimatedSize);
     }
-  } else {
+  }
+  else
+  {
     cerr << "+---------------------------+\n";
     cerr << "   Error al cargar imagen  \n";
     cerr << "+---------------------------+\n";
@@ -76,14 +84,17 @@ void Image::image(const char *path) {
  * image and stores them into separate vectors. The function prints a
  * success message once the channels are extracted.
  */
-void Image::extractChannels() {
+void Image::extractChannels()
+{
 
   canalRojo.resize(height, vector<int>(width));
   canalVerde.resize(height, vector<int>(width));
   canalAzul.resize(height, vector<int>(width));
 
-  for (int i = 0; i < height; i++) {
-    for (int j = 0; j < width; j++) {
+  for (int i = 0; i < height; i++)
+  {
+    for (int j = 0; j < width; j++)
+    {
       canalRojo[i][j] = data[(i * width + j) * channels];
       canalVerde[i][j] = data[(i * width + j) * channels + 1];
       canalAzul[i][j] = data[(i * width + j) * channels + 2];
@@ -103,7 +114,8 @@ void Image::extractChannels() {
  *
  * @param angle The angle by which to rotate the image in degrees.
  */
-void Image::rotateImage(int angle) {
+void Image::rotateImage(int angle)
+{
   // Convert angle to radians
   double radians = angle * M_PI / 180.0;
 
@@ -118,11 +130,14 @@ void Image::rotateImage(int angle) {
   // Create new blank image data
   Image rotatedImage;
   rotatedImage.useBuddySystem = useBuddySystem;
-  if (useBuddySystem && buddyManager != nullptr) {
+  if (useBuddySystem && buddyManager != nullptr)
+  {
     rotatedImage.data = static_cast<unsigned char *>(
         buddyManager->allocate(newWidth * newHeight * channels));
     memset(rotatedImage.data, 0, newWidth * newHeight * channels);
-  } else {
+  }
+  else
+  {
     rotatedImage.data = new unsigned char[newWidth * newHeight * channels]();
   }
 
@@ -135,8 +150,10 @@ void Image::rotateImage(int angle) {
   Eigen::Vector2f centerNew(newWidth / 2.0, newHeight / 2.0);
 
   // Iterate over each pixel in the new image
-  for (int i = 0; i < newHeight; i++) {
-    for (int j = 0; j < newWidth; j++) {
+  for (int i = 0; i < newHeight; i++)
+  {
+    for (int j = 0; j < newWidth; j++)
+    {
       // Compute new pixel coordinates relative to center
       Eigen::Vector2f newCoords(j, i);
       Eigen::Vector2f oldCoords =
@@ -147,15 +164,20 @@ void Image::rotateImage(int angle) {
 
       // Check if the transformed coordinates are inside the original image
       // bounds
-      if (x >= 0 && x < width && y >= 0 && y < height) {
+      if (x >= 0 && x < width && y >= 0 && y < height)
+      {
         // Copy pixel values from original image
-        for (int c = 0; c < channels; c++) {
+        for (int c = 0; c < channels; c++)
+        {
           rotatedImage.data[(i * newWidth + j) * channels + c] =
               data[(y * width + x) * channels + c];
         }
-      } else {
+      }
+      else
+      {
         // Assign black pixels for out-of-bounds areas
-        for (int c = 0; c < channels; c++) {
+        for (int c = 0; c < channels; c++)
+        {
           rotatedImage.data[(i * newWidth + j) * channels + c] = 0;
         }
       }
@@ -167,7 +189,8 @@ void Image::rotateImage(int angle) {
   rotatedImage.saveImage("./output/rotated.jpg");
 
   if (useBuddySystem && buddyManager != nullptr &&
-      buddyManager->isManaged(rotatedImage.data)) {
+      buddyManager->isManaged(rotatedImage.data))
+  {
     buddyManager->deallocate(rotatedImage.data);
     rotatedImage.data = nullptr;
   }
@@ -182,8 +205,10 @@ void Image::rotateImage(int angle) {
  *
  * @param scaleFactor The factor by which to scale the image.
  */
-void Image::scaleImage(float scaleFactor) {
-  if (scaleFactor <= 0) {
+void Image::scaleImage(float scaleFactor)
+{
+  if (scaleFactor <= 0)
+  {
     cerr << "El factor de escala debe ser mayor que 0." << endl;
     return;
   }
@@ -196,11 +221,14 @@ void Image::scaleImage(float scaleFactor) {
   Image scaledImage;
   scaledImage.useBuddySystem = useBuddySystem;
 
-  if (useBuddySystem && buddyManager != nullptr) {
+  if (useBuddySystem && buddyManager != nullptr)
+  {
     scaledImage.data = static_cast<unsigned char *>(
         buddyManager->allocate(newWidth * newHeight * channels));
     memset(scaledImage.data, 0, newWidth * newHeight * channels);
-  } else {
+  }
+  else
+  {
     scaledImage.data = new unsigned char[newWidth * newHeight * channels]();
   }
 
@@ -212,8 +240,10 @@ void Image::scaleImage(float scaleFactor) {
   float scaleY = static_cast<float>(height) / newHeight;
 
   // Interpolation
-  for (int i = 0; i < newHeight; i++) {
-    for (int j = 0; j < newWidth; j++) {
+  for (int i = 0; i < newHeight; i++)
+  {
+    for (int j = 0; j < newWidth; j++)
+    {
       float srcX = j * scaleX;
       float srcY = i * scaleY;
 
@@ -225,7 +255,8 @@ void Image::scaleImage(float scaleFactor) {
       float dx = srcX - x1;
       float dy = srcY - y1;
 
-      for (int c = 0; c < channels; c++) {
+      for (int c = 0; c < channels; c++)
+      {
         float pixelValue =
             (1 - dx) * (1 - dy) * data[(y1 * width + x1) * channels + c] +
             dx * (1 - dy) * data[(y1 * width + x2) * channels + c] +
@@ -243,9 +274,74 @@ void Image::scaleImage(float scaleFactor) {
 
   scaledImage.saveImage("./output/scaled.jpg");
   if (useBuddySystem && buddyManager != nullptr &&
-      buddyManager->isManaged(scaledImage.data)) {
+      buddyManager->isManaged(scaledImage.data))
+  {
     buddyManager->deallocate(scaledImage.data);
     scaledImage.data = nullptr;
+  }
+}
+
+/**
+ * @brief Processes a specific quadrant of the image and applies the transformation (rotation + scaling).
+ *
+ * This function processes a rectangular region (quadrant) of the transformed image based on the
+ * provided bounds (start and end rows and columns). It computes the corresponding coordinates in
+ * the original image using the inverse transformation matrix, and then maps the pixel values from
+ * the original image to the transformed image.
+ *
+ * The function performs the following steps:
+ * 1. For each pixel in the specified quadrant, it calculates the corresponding pixel coordinates
+ *    in the original image by applying the inverse transformation matrix.
+ * 2. It then checks whether the calculated coordinates are within the bounds of the original image.
+ * 3. If the coordinates are valid, it copies the pixel values from the original image to the transformed
+ *    image; otherwise, it sets the pixel value in the transformed image to zero (black).
+ *
+ * @param transformedImage The image that will store the result of the transformation.
+ * @param transformMatrix The transformation matrix (including rotation and scaling).
+ * @param centerOriginal The center coordinates of the original image.
+ * @param centerNew The center coordinates of the transformed image.
+ * @param startRow The starting row index for the quadrant.
+ * @param endRow The ending row index for the quadrant.
+ * @param startCol The starting column index for the quadrant.
+ * @param endCol The ending column index for the quadrant.
+ * @param width The width of the original image.
+ * @param height The height of the original image.
+ * @param channels The number of color channels in the image (e.g., 3 for RGB).
+ * @param data The raw pixel data of the original image.
+ */
+void processQuadrant(Image &transformedImage, const Eigen::Matrix2f &transformMatrix,
+                     const Eigen::Vector2f &centerOriginal, const Eigen::Vector2f &centerNew,
+                     int startRow, int endRow, int startCol, int endCol,
+                     int width, int height, int channels, unsigned char *data)
+{
+  for (int i = startRow; i < endRow; i++)
+  {
+    for (int j = startCol; j < endCol; j++)
+    {
+      Eigen::Vector2f newCoords(j, i);
+      Eigen::Vector2f oldCoords = transformMatrix.inverse() * (newCoords - centerNew) + centerOriginal;
+
+      int x = round(oldCoords[0]);
+      int y = round(oldCoords[1]);
+
+      unsigned char* imageData = transformedImage.getData();
+
+      if (x >= 0 && x < width && y >= 0 && y < height)
+      {
+        for (int c = 0; c < channels; c++)
+        {
+          imageData[(i * transformedImage.getWidth() + j) * channels + c] =
+              data[(y * width + x) * channels + c];
+        }
+      }
+      else
+      {
+        for (int c = 0; c < channels; c++)
+        {
+          imageData[(i * transformedImage.getWidth() + j) * channels + c] = 0;
+        }
+      }
+    }
   }
 }
 
@@ -264,19 +360,14 @@ void Image::scaleImage(float scaleFactor) {
  */
 void Image::transformImage(const string &inputPath, const string &outputPath,
                            int angle, float scaleFactor, bool buddySystem,
-                           bool showOutput) {
+                           bool showOutput, int numDivisions) {
   using namespace std::chrono;
-
-  // Set buddy system flag
+                            
   useBuddySystem = buddySystem;
 
-  // Start measuring time
   auto start = high_resolution_clock::now();
-
-  // Get memory usage before transformation
   double memoryBefore = getMemoryUsageMB();
 
-  // Load the image
   image(inputPath.c_str());
 
   if (scaleFactor <= 0) {
@@ -286,21 +377,8 @@ void Image::transformImage(const string &inputPath, const string &outputPath,
     return;
   }
 
-  if (showOutput) {
-    cout << "\033[32m+---------------------------+\n";
-    cout << "       PROCESAMIENTO        \n";
-    cout << "+---------------------------+\n";
-    cout << " Archivo entrada: " << inputPath << " \n";
-    cout << " Archivo salida: " << outputPath << " \n";
-    cout << " Modo de asignación de memoria : "
-         << (buddySystem ? "Buddy system" : "Sin Buddy system") << " \n";
-    cout << "+---------------------------+\n";
-    cout << " Dimensiones originales: " << width << "x" << height
-         << " \n\033[0m";
-  }
-
+  // Setup for the transformMatrix and new image dimensions
   double radians = angle * M_PI / 180.0;
-
   Eigen::Matrix2f transformMatrix;
   transformMatrix << scaleFactor * cos(radians), -scaleFactor * sin(radians),
       scaleFactor * sin(radians), scaleFactor * cos(radians);
@@ -310,29 +388,16 @@ void Image::transformImage(const string &inputPath, const string &outputPath,
   int newHeight = abs(width * scaleFactor * sin(radians)) +
                   abs(height * scaleFactor * cos(radians));
 
-  if (showOutput) {
-    cout << "\033[32m Dimensiones finales: " << newWidth << "x" << newHeight
-         << " \n";
-    cout << " Canales: " << channels << " (RGB)\n";
-    cout << " Ángulo de rotación: " << angle << " grados\n";
-    cout << " Factor de escalado: " << scaleFactor << " \n\033[0m";
-  }
-
   Image transformedImage;
   transformedImage.useBuddySystem = useBuddySystem;
 
-  // Start measuring time for the specific memory allocation method
   auto buddyStart = high_resolution_clock::now();
-
   if (useBuddySystem && buddyManager != nullptr) {
-    transformedImage.data = static_cast<unsigned char *>(
-        buddyManager->allocate(newWidth * newHeight * channels));
+    transformedImage.data = static_cast<unsigned char *>(buddyManager->allocate(newWidth * newHeight * channels));
     memset(transformedImage.data, 0, newWidth * newHeight * channels);
   } else {
-    transformedImage.data =
-        new unsigned char[newWidth * newHeight * channels]();
+    transformedImage.data = new unsigned char[newWidth * newHeight * channels]();
   }
-
   auto buddyEnd = high_resolution_clock::now();
   auto buddyDuration = duration_cast<milliseconds>(buddyEnd - buddyStart);
 
@@ -343,63 +408,74 @@ void Image::transformImage(const string &inputPath, const string &outputPath,
   Eigen::Vector2f centerOriginal(width / 2.0, height / 2.0);
   Eigen::Vector2f centerNew(newWidth / 2.0, newHeight / 2.0);
 
-  for (int i = 0; i < newHeight; i++) {
-    for (int j = 0; j < newWidth; j++) {
-      Eigen::Vector2f newCoords(j, i);
-      Eigen::Vector2f oldCoords =
-          transformMatrix.inverse() * (newCoords - centerNew) + centerOriginal;
+  // Divisions for processing the image in parallel
+  int blockRows = newHeight / numDivisions;
+  int blockCols = newWidth / numDivisions;
 
-      int x = round(oldCoords[0]);
-      int y = round(oldCoords[1]);
+  // Vector to store time per thread
+  std::vector<long long> threadTimes(omp_get_max_threads(), 0);
 
-      if (x >= 0 && x < width && y >= 0 && y < height) {
-        for (int c = 0; c < channels; c++) {
-          transformedImage.data[(i * newWidth + j) * channels + c] =
-              data[(y * width + x) * channels + c];
-        }
-      } else {
-        for (int c = 0; c < channels; c++) {
-          transformedImage.data[(i * newWidth + j) * channels + c] = 0;
-        }
-      }
+  #pragma omp parallel for collapse(2)
+  for (int rowDiv = 0; rowDiv < numDivisions; rowDiv++) {
+    for (int colDiv = 0; colDiv < numDivisions; colDiv++) {
+      int startRow = rowDiv * blockRows;
+      int endRow = (rowDiv == numDivisions - 1) ? newHeight : (rowDiv + 1) * blockRows;
+      int startCol = colDiv * blockCols;
+      int endCol = (colDiv == numDivisions - 1) ? newWidth : (colDiv + 1) * blockCols;
+
+      auto threadStart = high_resolution_clock::now(); 
+
+      processQuadrant(transformedImage, transformMatrix, centerOriginal, centerNew,
+                      startRow, endRow, startCol, endCol,
+                      width, height, channels, data);
+
+      auto threadEnd = high_resolution_clock::now();
+      long long threadDuration = duration_cast<milliseconds>(threadEnd - threadStart).count();
+      int threadId = omp_get_thread_num();
+      threadTimes[threadId] += threadDuration; 
     }
   }
 
-  // End measuring time
   auto stop = high_resolution_clock::now();
-  auto duration = duration_cast<milliseconds>(stop - start);
+  auto totalDuration = duration_cast<milliseconds>(stop - start);
 
-  // Get memory usage after transformation
   double memoryAfter = getMemoryUsageMB();
   double memoryUsed = memoryAfter - memoryBefore;
 
-  if (showOutput) {
+  // Show output for processing times
+
     cout << "\033[32m+---------------------------+\n";
     cout << "   TIEMPO DE PROCESAMIENTO   \n";
     cout << "+---------------------------+\n";
-
-    if (useBuddySystem) {
-      cout << "- Sin Buddy system: " << "[ ]" << " ms" << endl;
-      cout << "- Con Buddy system: " << duration.count() << " ms" << endl;
-      cout << "- Tiempo de asignación con Buddy: " << buddyDuration.count()
-           << " ms" << endl;
-    } else {
-      cout << "- Sin Buddy system: " << duration.count() << " ms" << endl;
-      cout << "- Con Buddy system: " << "[ ]" << " ms" << endl;
-    }
-
-    // Display memory usage
+    cout << "- Total Processing Time: " << totalDuration.count() << " ms\n";
+    cout << "- Tiempo de asignación con Buddy: " << buddyDuration.count() << " ms\n";
     cout << "- Memoria utilizada: " << memoryUsed << " MB\n\033[0m";
-  }
+
+
+    // Print out the time for each thread
+    cout << "\033[32m+---------------------------+\n";
+    cout << "       CONCURRENCIA  \n";
+    cout << "+---------------------------+\n";
+    cout << "+ Número de divisiones: " << numDivisions << "\n";
+    cout << "+ Número de filas: " << blockRows << "\n";
+    cout << "+ Número de columnas: " << blockCols << "\n";
+    cout << "+ Número de hilos: " << omp_get_max_threads() << "\n";
+
+    for (size_t i = 0; i < threadTimes.size(); i++) {
+      if (threadTimes[i] > 0) {
+        cout << "🧵 Hilo " << i+1 << " tiempo: " << threadTimes[i] << " ms" << endl;
+      }
+    }
+  
 
   transformedImage.saveImage(outputPath);
 
-  if (useBuddySystem && buddyManager != nullptr &&
-      buddyManager->isManaged(transformedImage.data)) {
+  if (useBuddySystem && buddyManager != nullptr && buddyManager->isManaged(transformedImage.data)) {
     buddyManager->deallocate(transformedImage.data);
     transformedImage.data = nullptr;
   }
 }
+
 
 /**
  * @brief Saves the image data to the specified file path.
@@ -409,15 +485,20 @@ void Image::transformImage(const string &inputPath, const string &outputPath,
  *
  * @param outputPath The file path where the image will be saved.
  */
-void Image::saveImage(const string &outputPath) {
-  if (!data) {
+void Image::saveImage(const string &outputPath)
+{
+  if (!data)
+  {
     cerr << "[ERROR] No hay datos de imagen disponibles para guardar\n";
     return;
   }
 
-  if (stbi_write_jpg(outputPath.c_str(), width, height, channels, data, 100)) {
+  if (stbi_write_jpg(outputPath.c_str(), width, height, channels, data, 100))
+  {
     cout << "[INFO] Imagen guardada correctamente en " << outputPath << "\n";
-  } else {
+  }
+  else
+  {
     cerr << "[ERROR] Error al guardar la imagen \n";
   }
 }
@@ -427,12 +508,17 @@ void Image::saveImage(const string &outputPath) {
  *
  * Frees the allocated image data memory to avoid memory leaks.
  */
-Image::~Image() {
-  if (data) {
+Image::~Image()
+{
+  if (data)
+  {
     if (useBuddySystem && buddyManager != nullptr &&
-        buddyManager->isManaged(data)) {
+        buddyManager->isManaged(data))
+    {
       buddyManager->deallocate(data);
-    } else {
+    }
+    else
+    {
       stbi_image_free(data);
     }
     data = nullptr;

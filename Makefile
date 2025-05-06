@@ -1,10 +1,10 @@
 # Compiler and flags
 CXX = g++
-CXXFLAGS = -I. -isystem /usr/include/eigen3 -Wall -Wextra -g
+CXXFLAGS = -I. -isystem /usr/include/eigen3 -Wall -Wextra -g -fopenmp
 
 # Target executables
-TARGET = main
-BENCHMARK = benchmark
+TARGET = Main
+BENCHMARK = Benchmark
 
 # Source files
 SRCS = main.cpp image.cpp stb_wrapper.cpp

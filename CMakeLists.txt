@@ -1,20 +1,17 @@
-# Minimum CMake version
 cmake_minimum_required(VERSION 3.10)
 
-# Project name and language
 project(ImageRotationScaling LANGUAGES CXX)
 
-# Set C++ standard
 set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
-# Enable warnings
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -g -Wno-missing-field-initializers")
 
-# Include directories
 include_directories(${CMAKE_SOURCE_DIR})
 include_directories(/usr/include/eigen3)
+
+find_package(OpenMP REQUIRED)
 
 # Source files for the main application
 set(MAIN_SOURCES
@@ -30,8 +27,12 @@ set(BENCHMARK_SOURCES
     stb_wrapper.cpp
 )
 
-# Add executable for the main application
+# Add executables
 add_executable(ImageRotationScaling ${MAIN_SOURCES})
-
-# Add executable for the benchmark
 add_executable(Benchmark ${BENCHMARK_SOURCES})
+
+# Link OpenMP after executables are defined
+if(OpenMP_CXX_FOUND)
+    target_link_libraries(ImageRotationScaling PUBLIC OpenMP::OpenMP_CXX)
+    target_link_libraries(Benchmark PUBLIC OpenMP::OpenMP_CXX)
+endif()

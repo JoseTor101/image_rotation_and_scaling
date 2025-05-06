@@ -101,7 +101,8 @@ void printPerformanceTable(const vector<PerformanceResult> &results) {
  */
 vector<PerformanceResult>
 runBenchmarks(const string &inputPath,
-              const vector<pair<int, float>> &transformParams) {
+              const vector<pair<int, float>> &transformParams,
+              int numDivisions) {
   vector<PerformanceResult> results;
 
   auto getMemoryUsageMB = []() {
@@ -156,7 +157,7 @@ runBenchmarks(const string &inputPath,
 
       // Call the actual transformation
       img.transformImage(inputPath, outputPath, angle, scaleFactor, useBuddy,
-                         false);
+                         false, numDivisions);
       cout << " \n";
 
       auto end = chrono::high_resolution_clock::now();
@@ -192,6 +193,7 @@ int main(int argc, char *argv[]) {
   string inputPath = "../imgs/fish.jpg";
   int angulo = 0;
   float escalar = 1.0f;
+  int numDivisiones = 1; // Number of divisions for parallel processing
 
   for (int i = 1; i < argc; ++i) {
     if (strcmp(argv[i], "-entrada") == 0 && i + 1 < argc) {
@@ -200,6 +202,8 @@ int main(int argc, char *argv[]) {
       angulo = stoi(argv[i + 1]);
     } else if (strcmp(argv[i], "-escalar") == 0 && i + 1 < argc) {
       escalar = stof(argv[i + 1]);
+    } else if (strcmp(argv[i], "-divisiones") == 0 && i + 1 < argc) {
+      numDivisiones = stoi(argv[i + 1]);
     }
   }
 
@@ -212,7 +216,10 @@ int main(int argc, char *argv[]) {
       {angulo, escalar},
   };
 
-  auto results = runBenchmarks(inputPath, transformParams);
+  transformParams.push_back({30, 1.1f}); // Case
+  transformParams.push_back({70, 0.8f}); // Case
+
+  auto results = runBenchmarks(inputPath, transformParams, numDivisiones);
   printPerformanceTable(results);
 
   if (buddyManager != nullptr) {

@@ -22,6 +22,7 @@ void printPerformanceTable(const std::vector<PerformanceResult> &results);
 // Function to run benchmarks
 std::vector<PerformanceResult>
 runBenchmarks(const std::string &inputPath,
-              const std::vector<std::pair<int, float>> &transformParams);
+              const std::vector<std::pair<int, float>> &transformParams,
+              int numDivisions);
 
 #endif // BENCHMARK_H

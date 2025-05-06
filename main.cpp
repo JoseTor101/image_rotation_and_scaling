@@ -33,6 +33,7 @@ int main(int argc, char *argv[]) {
   int angle = 0;
   float scaleFactor = 1.0f;
   bool buddySystem = false;
+  int numDivisions = 1; // Number of divisions for parallel processing
   std::string inputPath = "./test/fish.jpg";
   std::string outputPath = "./output/output.jpg";
 
@@ -47,29 +48,44 @@ int main(int argc, char *argv[]) {
       outputPath = argv[i + 1];
     } else if (strcmp(argv[i], "-buddy") == 0) {
       buddySystem = true;
+    } else if (strcmp(argv[i], "-divisiones") == 0 && i + 1 < argc) {
+      numDivisions = std::stoi(argv[i + 1]);
     }
   }
 
   // Apply transformations
   img.transformImage(inputPath, outputPath, angle, scaleFactor, buddySystem,
-                     true);
+                     true, numDivisions);
 
   if (buddyManager != nullptr) {
     delete buddyManager;
     buddyManager = nullptr;
   }
 
+  bool runBenchmark;
+  string input;
+
+  cout << "📊 Ejecutar pruebas de rendimiento?  y/n" << endl;
+  cin >> input;
+  cout << "\n";
+
+  input == "y" ? runBenchmark = true : runBenchmark = false;
+  
+  if(runBenchmark){
   // Construct the command with parameters
-  std::ostringstream command;
-  command << "./Benchmark -entrada " << inputPath << " -angulo " << angle
-          << " -escalar " << scaleFactor;
+    std::ostringstream command;
+    command << "./Benchmark -entrada " << inputPath << " -angulo " << angle
+            << " -escalar " << scaleFactor << " -divisiones " << numDivisions;
 
-  // Execute Benchmarks
-  int result = std::system(command.str().c_str());
-  if (result != 0) {
-    std::cerr << "Error: Failed to execute ./Benchmark" << std::endl;
-    return result;
+    // Execute Benchmarks
+    int result = std::system(command.str().c_str());
+    if (result != 0) {
+      std::cerr << "Error: Failed to execute ./Benchmark" << std::endl;
+      return result;
+    }
+  }else {
+    cout << "☑ Fin del programa. " <<endl;
   }
-
+  
   return 0;
 }
